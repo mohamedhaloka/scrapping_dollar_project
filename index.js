@@ -24,7 +24,7 @@ app.get('/', (req, res) => res.send('Hello World!'))
 
 console.log(Date())
 //5*60*1000 = 300K milliseconds
-setInterval(getDollarValue, 300000);
+setInterval(getDollarValue, 100000);
 
 async function getDollarValue() {
     try {
