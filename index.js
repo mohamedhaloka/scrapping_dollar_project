@@ -6,8 +6,9 @@ const { collection, doc, setDoc, getDoc, updateDoc } = require("firebase/firesto
 const admin = require('firebase-admin');
 
 //30*1000 = 300K milliseconds
-setInterval(processGoldValuesEGP, 10000);
+setInterval(processGoldValuesEGP, 1200000);
 
+// processGoldValuesEGP()
 let oldGold21Price = '';
 
 
@@ -36,8 +37,6 @@ async function processGoldValuesEGP() {
         console.log('Gold 24 ' + gold24Value);
 
         if (oldGold21Price == gold21Value) return;
-
-
 
 
         const goldPricesRef = collection(database, "prices");
