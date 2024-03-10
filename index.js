@@ -6,7 +6,7 @@ const { collection, doc, setDoc, getDoc, updateDoc } = require("firebase/firesto
 const admin = require('firebase-admin');
 
 //30*1000 = 300K milliseconds
-setInterval(processGoldValuesEGP, 30000);
+setInterval(processGoldValuesEGP, 900000);
 
 // processGoldValuesEGP()
 let oldGold21Price = '';
