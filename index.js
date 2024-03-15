@@ -4,22 +4,30 @@ const cheerio = require('cheerio');
 const { database } = require('./firebase');
 const { collection, doc, setDoc, getDoc, updateDoc } = require("firebase/firestore");
 const admin = require('firebase-admin');
+const cron = require('node-cron');
 
 //30*1000 = 300K milliseconds
-setInterval(processGoldValuesEGP, 900000);
 
-// processGoldValuesEGP()
 let oldGold21Price = '';
+
+cron.schedule('*/1 11-23 * * *', function() {
+    console.log('Running a job at Africa/Cairo timezone');
+    processGoldValuesEGP();
+}, {
+  scheduled: true,
+  timezone: "Africa/Cairo"
+});
 
 
 async function processGoldValuesEGP() {
     try {
-        const response = await axios.get("https://market.isagha.com/products/2153");
+        const response = await axios.get("https://goldbullioneg.com/%D8%A3%D8%B3%D8%B9%D8%A7%D8%B1-%D8%A7%D9%84%D8%B0%D9%87%D8%A8/");
         const $ = cheerio.load(response.data);
 
         const divStr = $("div > div > table > tbody > tr > td").text()
 
-        let gold21Value = (extractNumbersFromString(divStr)[0]).toString();
+
+        let gold21Value = (extractNumbersFromString(divStr)[2]).toString().substring(0, 4);
 
         var regex = /^\d+(\.\d+)?$/;
 
@@ -38,32 +46,31 @@ async function processGoldValuesEGP() {
 
         if (oldGold21Price == gold21Value) return;
 
+        // const goldPricesRef = collection(database, "prices");
+        // const notificationsRef = collection(database, "notifications");
 
-        const goldPricesRef = collection(database, "prices");
-        const notificationsRef = collection(database, "notifications");
+        // var myTimestamp = admin.firestore.Timestamp.fromDate(new Date());
 
-        var myTimestamp = admin.firestore.Timestamp.fromDate(new Date());
-
-        await updateDoc(doc(goldPricesRef, "gold_prices"), {
-            gold_prices: {
-                karat_18_sell: gold18Value,
-                karat_21_sell: gold21Value,
-                karat_24_sell: gold24Value,
-            },
-            date: myTimestamp.toDate(),
-        });
-
-
-        await setDoc(doc(notificationsRef), {
-            title: "تم تحديث سعر الذهب عيار 21",
-            body: gold21Value,
-            created_at: myTimestamp.toDate(),
-        });
-
-        postNotification(gold21Value)
+        // await updateDoc(doc(goldPricesRef, "gold_prices"), {
+        //     gold_prices: {
+        //         karat_18_sell: gold18Value,
+        //         karat_21_sell: gold21Value,
+        //         karat_24_sell: gold24Value,
+        //     },
+        //     date: myTimestamp.toDate(),
+        // });
 
 
-        oldGold21Price = gold21Value;
+        // await setDoc(doc(notificationsRef), {
+        //     title: "تم تحديث سعر الذهب عيار 21",
+        //     body: gold21Value,
+        //     created_at: myTimestamp.toDate(),
+        // });
+
+        // postNotification(gold21Value)
+
+
+        // oldGold21Price = gold21Value;
     }
     catch (e) {
         console.error(e)
